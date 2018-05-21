@@ -66,7 +66,7 @@ var StepZilla = function (_Component) {
         } else {
           // check if isValidated was exposed in the step, if yes then set initial state as not validated (false) or vice versa
           // if HOCValidation is used for the step then mark it as "requires to be validated. i.e. false"
-          i.validated = typeof i.component.type === 'undefined' || typeof i.component.type.prototype.isValidated === 'undefined' && !_this2.isStepAtIndexHOCValidationBased(idx) ? true : false;
+          i.validated = !!(typeof i.component.type === 'undefined' || typeof i.component.type.prototype.isValidated === 'undefined' && !_this2.isStepAtIndexHOCValidationBased(idx));
         }
 
         return i;
@@ -113,7 +113,7 @@ var StepZilla = function (_Component) {
       // last step hide next btn, hide previous btn if supplied as props
       if (currentStep >= this.props.steps.length - 1) {
         showNextBtn = false;
-        showPreviousBtn = this.props.prevBtnOnLastStep === false ? false : true;
+        showPreviousBtn = this.props.prevBtnOnLastStep !== false;
       }
 
       return {
@@ -189,7 +189,7 @@ var StepZilla = function (_Component) {
         var passThroughStepsNotValid = false; // if we are jumping forward, only allow that if inbetween steps are all validated. This flag informs the logic...
         var proceed = false; // flag on if we should move on
 
-        this.abstractStepMoveAllowedToPromise(movingBack).then(function () {
+        return this.abstractStepMoveAllowedToPromise(movingBack).then(function () {
           var valid = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
           // validation was a success (promise or sync validation). In it was a Promise's resolve() then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync v
           proceed = valid;
@@ -244,7 +244,7 @@ var StepZilla = function (_Component) {
     value: function next() {
       var _this4 = this;
 
-      this.abstractStepMoveAllowedToPromise().then(function () {
+      return this.abstractStepMoveAllowedToPromise().then(function () {
         var proceed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
         // validation was a success (promise or sync validation). In it was a Promise's resolve() then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync validation
@@ -300,21 +300,19 @@ var StepZilla = function (_Component) {
 
       if (this.props.dontValidate) {
         proceed = true;
+      } else if (skipValidationExecution) {
+        // we are moving backwards in steps, in this case dont validate as it means the user is not commiting to "save"
+        proceed = true;
+      } else if (this.isStepAtIndexHOCValidationBased(this.state.compState)) {
+        // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
+        // so use hocValidationAppliedTo to determine if this step needs the aync validation as per react-validation-mixin interface
+        proceed = this.refs.activeComponent.refs.component.isValidated();
+      } else if (Object.keys(this.refs).length == 0 || typeof this.refs.activeComponent.isValidated === 'undefined') {
+        // if its a form component, it should have implemeted a public isValidated class (also pure componenets wont even have refs - i.e. a empty object). If not then continue
+        proceed = true;
       } else {
-        if (skipValidationExecution) {
-          // we are moving backwards in steps, in this case dont validate as it means the user is not commiting to "save"
-          proceed = true;
-        } else if (this.isStepAtIndexHOCValidationBased(this.state.compState)) {
-          // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
-          // so use hocValidationAppliedTo to determine if this step needs the aync validation as per react-validation-mixin interface
-          proceed = this.refs.activeComponent.refs.component.isValidated();
-        } else if (Object.keys(this.refs).length == 0 || typeof this.refs.activeComponent.isValidated == 'undefined') {
-          // if its a form component, it should have implemeted a public isValidated class (also pure componenets wont even have refs - i.e. a empty object). If not then continue
-          proceed = true;
-        } else {
-          // user is moving forward in steps, invoke validation as its available
-          proceed = this.refs.activeComponent.isValidated();
-        }
+        // user is moving forward in steps, invoke validation as its available
+        proceed = this.refs.activeComponent.isValidated();
       }
 
       return proceed;
@@ -338,10 +336,12 @@ var StepZilla = function (_Component) {
   }, {
     key: 'getClassName',
     value: function getClassName(className, i) {
-      var liClassName = className + "-" + this.state.navState.styles[i];
+      var liClassName = className + '-' + this.state.navState.styles[i];
 
       // if step ui based navigation is disabled, then dont highlight step
-      if (!this.props.stepsNavigation) liClassName += " no-hl";
+      if (!this.props.stepsNavigation) {
+        liClassName += ' no-hl';
+      }
 
       return liClassName;
     }
@@ -356,8 +356,8 @@ var StepZilla = function (_Component) {
       return this.props.steps.map(function (s, i) {
         return _react2.default.createElement(
           'li',
-          { className: _this5.getClassName("progtrckr", i), onClick: function onClick(evt) {
-              _this5.jumpToStep(evt);
+          { className: _this5.getClassName('progtrckr', i), onClick: function onClick(evt) {
+              _this5.props.onProgressTrackerJump(_this5.jumpToStep(evt));
             }, key: i, value: i },
           _react2.default.createElement(
             'em',
@@ -458,10 +458,10 @@ StepZilla.defaultProps = {
   dontValidate: false,
   preventEnterSubmission: false,
   startAtStep: 0,
-  nextButtonText: "Next",
-  nextButtonCls: "btn btn-prev btn-primary btn-lg pull-right",
-  backButtonText: "Previous",
-  backButtonCls: "btn btn-next btn-primary btn-lg pull-left",
+  nextButtonText: 'Next',
+  nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
+  backButtonText: 'Previous',
+  backButtonCls: 'btn btn-next btn-primary btn-lg pull-left',
   hocValidationAppliedTo: []
 };
 
@@ -482,5 +482,6 @@ StepZilla.propTypes = {
   backButtonCls: _propTypes2.default.string,
   backButtonText: _propTypes2.default.string,
   hocValidationAppliedTo: _propTypes2.default.array,
-  onStepChange: _propTypes2.default.func
+  onStepChange: _propTypes2.default.func,
+  onProgressTrackerJump: _propTypes2.default.func
 };
