@@ -267,7 +267,7 @@ export default class StepZilla extends Component {
   // render the steps as stepsNavigation
   renderSteps() {
     return this.props.steps.map((s, i) => (
-      <li className={this.getClassName('progtrckr', i)} onClick={(evt) => { this.jumpToStep(evt); }} key={i} value={i}>
+      <li className={this.getClassName('progtrckr', i)} onClick={(evt) => { this.props.onProgressTrackerJump(this.jumpToStep(evt)); }} key={i} value={i}>
           <em>{i + 1}</em>
           <span>{this.props.steps[i].name}</span>
       </li>
@@ -362,5 +362,6 @@ StepZilla.propTypes = {
   backButtonCls: PropTypes.string,
   backButtonText: PropTypes.string,
   hocValidationAppliedTo: PropTypes.array,
-  onStepChange: PropTypes.func
+  onStepChange: PropTypes.func,
+  onProgressTrackerJump: PropTypes.func
 };
