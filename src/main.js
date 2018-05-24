@@ -296,13 +296,21 @@ export default class StepZilla extends Component {
 
     compToRender = React.cloneElement(componentPointer, cloneExtensions);
 
+    const percentComplete = this.state.compState / this.props.steps.length * 100;
+
     return (
       <div className="multi-step" onKeyDown={(evt) => { this.handleKeyDown(evt); }}>
           {
               this.props.showSteps
-                  ? <ol className="progtrckr">
-                      {this.renderSteps()}
-                  </ol>
+                  ?
+                  <div className="progtracker-wrap">
+                    <div className="progtracker-track" style={{ width: `${percentComplete}%` }}/>
+                    <div className="progtracker-list">
+                      <ol>
+                        {this.renderSteps()}
+                      </ol>
+                    </div>
+                  </div>
               : <span></span>
           }
 

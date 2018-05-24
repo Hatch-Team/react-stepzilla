@@ -401,15 +401,26 @@ var StepZilla = function (_Component) {
 
       compToRender = _react2.default.cloneElement(componentPointer, cloneExtensions);
 
+      var percentComplete = this.state.compState / this.props.steps.length * 100;
+
       return _react2.default.createElement(
         'div',
         { className: 'multi-step', onKeyDown: function onKeyDown(evt) {
             _this6.handleKeyDown(evt);
           } },
         this.props.showSteps ? _react2.default.createElement(
-          'ol',
-          { className: 'progtrckr' },
-          this.renderSteps()
+          'div',
+          { className: 'progtracker-wrap' },
+          _react2.default.createElement('div', { className: 'progtracker-track', style: { width: percentComplete + '%' } }),
+          _react2.default.createElement(
+            'div',
+            { className: 'progtracker-list' },
+            _react2.default.createElement(
+              'ol',
+              null,
+              this.renderSteps()
+            )
+          )
         ) : _react2.default.createElement('span', null),
         compToRender,
         _react2.default.createElement(
