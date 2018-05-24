@@ -401,7 +401,7 @@ var StepZilla = function (_Component) {
 
       compToRender = _react2.default.cloneElement(componentPointer, cloneExtensions);
 
-      var percentComplete = this.state.compState / this.props.steps.length * 100;
+      var percentComplete = (this.state.compState + 1) / this.props.steps.length * 100;
 
       return _react2.default.createElement(
         'div',
