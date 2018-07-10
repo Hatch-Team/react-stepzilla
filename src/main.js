@@ -118,11 +118,15 @@ export default class StepZilla extends Component {
 
   // this utility method lets Child components invoke a direct jump to another step
   jumpToStep(evt) {
-    if (evt.target == undefined) {
+    // using event.currentTarget so we always access the correct target and the children elements dont get in the way
+    // ref: https://stackoverflow.com/a/42634482
+    const targetValue = evt.currentTarget.value;
+
+    if (targetValue === undefined) {
       // a child step wants to invoke a jump between steps. in this case 'evt' is the numeric step number and not the JS event
       this.setNavState(evt);
     } else { // the main navigation step ui is invoking a jump between steps
-      if (!this.props.stepsNavigation || evt.target.value === this.state.compState) { // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
+      if (!this.props.stepsNavigation || targetValue === this.state.compState) { // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
         evt.preventDefault();
         evt.stopPropagation();
 
@@ -131,7 +135,7 @@ export default class StepZilla extends Component {
 
       evt.persist(); // evt is a react event so we need to persist it as we deal with aync promises which nullifies these events (https://facebook.github.io/react/docs/events.html#event-pooling)
 
-      const movingBack = evt.target.value < this.state.compState; // are we trying to move back or front?
+      const movingBack = targetValue < this.state.compState; // are we trying to move back or front?
       let passThroughStepsNotValid = false; // if we are jumping forward, only allow that if inbetween steps are all validated. This flag informs the logic...
       let proceed = false; // flag on if we should move on
 
@@ -148,7 +152,7 @@ export default class StepZilla extends Component {
               // looks like we are moving forward, 'reduce' a new array of step>validated values we need to check and 'some' that to get a decision on if we should allow moving forward
               passThroughStepsNotValid = this.props.steps
                 .reduce((a, c, i) => {
-                  if (i >= this.state.compState && i < evt.target.value) {
+                  if (i >= this.state.compState && i < targetValue) {
                     a.push(c.validated);
                   }
                   return a;
@@ -166,11 +170,11 @@ export default class StepZilla extends Component {
         .then(() => {
           // this is like finally(), executes if error no no error
           if (proceed && !passThroughStepsNotValid) {
-            if (evt.target.value === (this.props.steps.length - 1) &&
+            if (targetValue === (this.props.steps.length - 1) &&
               this.state.compState === (this.props.steps.length - 1)) {
               this.setNavState(this.props.steps.length);
             } else {
-              this.setNavState(evt.target.value);
+              this.setNavState(targetValue);
             }
           }
         })
