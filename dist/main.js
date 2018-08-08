@@ -140,7 +140,9 @@ var StepZilla = function (_Component) {
   }, {
     key: 'setNavState',
     value: function setNavState(next) {
-      this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+      this.setState({
+        navState: this.getNavStates(next, this.props.steps.length)
+      });
 
       if (next < this.props.steps.length) {
         this.setState({ compState: next });
@@ -195,6 +197,7 @@ var StepZilla = function (_Component) {
 
         return this.abstractStepMoveAllowedToPromise(movingBack).then(function () {
           var valid = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
           // validation was a success (promise or sync validation). In it was a Promise's resolve() then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync v
           proceed = valid;
 
@@ -360,9 +363,14 @@ var StepZilla = function (_Component) {
       return this.props.steps.map(function (s, i) {
         return _react2.default.createElement(
           'li',
-          { className: _this5.getClassName('progtrckr', i), onClick: function onClick(evt) {
+          {
+            className: _this5.getClassName('progtrckr', i),
+            onClick: function onClick(evt) {
               _this5.props.onProgressTrackerJump(_this5.jumpToStep(evt));
-            }, key: i, value: i },
+            },
+            key: i,
+            value: i
+          },
           _react2.default.createElement(
             'em',
             null,
@@ -409,27 +417,44 @@ var StepZilla = function (_Component) {
 
       return _react2.default.createElement(
         'div',
-        { className: 'multi-step', onKeyDown: function onKeyDown(evt) {
-            _this6.handleKeyDown(evt);
-          } },
-        this.props.showSteps ? _react2.default.createElement(
-          'div',
-          { className: 'progtracker-wrap' },
-          _react2.default.createElement('div', { className: 'progtracker-track', style: { width: percentComplete + '%' } }),
-          _react2.default.createElement(
-            'div',
-            { className: 'progtracker-list' },
-            _react2.default.createElement(
-              'ol',
-              null,
-              this.renderSteps()
-            )
-          )
-        ) : _react2.default.createElement('span', null),
-        compToRender,
+        { className: 'stepzilla' },
         _react2.default.createElement(
           'div',
-          { style: this.props.showNavigation ? {} : this.hidden, className: 'footer-buttons' },
+          {
+            className: 'multi-step',
+            onKeyDown: function onKeyDown(evt) {
+              _this6.handleKeyDown(evt);
+            }
+          },
+          this.props.showSteps ? _react2.default.createElement(
+            'div',
+            { className: 'progtracker-wrap' },
+            _react2.default.createElement('div', {
+              className: 'progtracker-track',
+              style: { width: percentComplete + '%' }
+            }),
+            _react2.default.createElement(
+              'div',
+              { className: 'progtracker-list' },
+              _react2.default.createElement(
+                'ol',
+                null,
+                this.renderSteps()
+              )
+            )
+          ) : _react2.default.createElement('span', null)
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'step-component' },
+          compToRender
+        ),
+        _react2.default.createElement(
+          'div',
+          {
+            style: this.props.showNavigation ? {} : this.hidden,
+            className: 'footer-buttons'
+          },
           _react2.default.createElement(
             'button',
             {

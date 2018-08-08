@@ -9,7 +9,10 @@ export default class StepZilla extends Component {
     this.state = {
       ...this.getPrevNextBtnState(this.props.startAtStep),
       compState: this.props.startAtStep,
-      navState: this.getNavStates(this.props.startAtStep, this.props.steps.length)
+      navState: this.getNavStates(
+        this.props.startAtStep,
+        this.props.steps.length
+      )
     };
 
     this.hidden = {
@@ -17,7 +20,9 @@ export default class StepZilla extends Component {
     };
 
     // if user did not give a custom nextTextOnFinalActionStep, the nextButtonText becomes the default
-    this.nextTextOnFinalActionStep = (this.props.nextTextOnFinalActionStep) ? this.props.nextTextOnFinalActionStep : this.props.nextButtonText;
+    this.nextTextOnFinalActionStep = this.props.nextTextOnFinalActionStep
+      ? this.props.nextTextOnFinalActionStep
+      : this.props.nextButtonText;
 
     this.applyValidationFlagsToSteps();
   }
@@ -30,9 +35,11 @@ export default class StepZilla extends Component {
       } else {
         // check if isValidated was exposed in the step, if yes then set initial state as not validated (false) or vice versa
         // if HOCValidation is used for the step then mark it as "requires to be validated. i.e. false"
-        i.validated = !!((typeof i.component.type === 'undefined' ||
+        i.validated = !!(
+          typeof i.component.type === 'undefined' ||
           (typeof i.component.type.prototype.isValidated === 'undefined' &&
-            !this.isStepAtIndexHOCValidationBased(idx))));
+            !this.isStepAtIndexHOCValidationBased(idx))
+        );
       }
 
       return i;
@@ -96,7 +103,9 @@ export default class StepZilla extends Component {
 
   // set the nav state
   setNavState(next) {
-    this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+    this.setState({
+      navState: this.getNavStates(next, this.props.steps.length)
+    });
 
     if (next < this.props.steps.length) {
       this.setState({ compState: next });
@@ -108,7 +117,10 @@ export default class StepZilla extends Component {
   // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
   handleKeyDown(evt) {
     if (evt.which === 13) {
-      if (!this.props.preventEnterSubmission && evt.target.type !== 'textarea') {
+      if (
+        !this.props.preventEnterSubmission &&
+        evt.target.type !== 'textarea'
+      ) {
         this.next();
       } else if (evt.target.type !== 'textarea') {
         evt.preventDefault();
@@ -125,8 +137,10 @@ export default class StepZilla extends Component {
     if (targetValue === undefined) {
       // a child step wants to invoke a jump between steps. in this case 'evt' is the numeric step number and not the JS event
       this.setNavState(evt);
-    } else { // the main navigation step ui is invoking a jump between steps
-      if (!this.props.stepsNavigation || targetValue === this.state.compState) { // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
+    } else {
+      // the main navigation step ui is invoking a jump between steps
+      if (!this.props.stepsNavigation || targetValue === this.state.compState) {
+        // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
         evt.preventDefault();
         evt.stopPropagation();
 
@@ -140,7 +154,8 @@ export default class StepZilla extends Component {
       let proceed = false; // flag on if we should move on
 
       return this.abstractStepMoveAllowedToPromise(movingBack)
-        .then((valid = true) => { // validation was a success (promise or sync validation). In it was a Promise's resolve() then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync v
+        .then((valid = true) => {
+          // validation was a success (promise or sync validation). In it was a Promise's resolve() then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync v
           proceed = valid;
 
           if (!movingBack) {
@@ -170,8 +185,10 @@ export default class StepZilla extends Component {
         .then(() => {
           // this is like finally(), executes if error no no error
           if (proceed && !passThroughStepsNotValid) {
-            if (targetValue === (this.props.steps.length - 1) &&
-              this.state.compState === (this.props.steps.length - 1)) {
+            if (
+              targetValue === this.props.steps.length - 1 &&
+              this.state.compState === this.props.steps.length - 1
+            ) {
               this.setNavState(this.props.steps.length);
             } else {
               this.setNavState(targetValue);
@@ -182,7 +199,9 @@ export default class StepZilla extends Component {
           if (e) {
             // see note below called "CatchRethrowing"
             // ... plus the finally then() above is what throws the JS Error so we need to catch that here specifically
-            setTimeout(() => { throw e; });
+            setTimeout(() => {
+              throw e;
+            });
           }
         });
     }
@@ -205,7 +224,9 @@ export default class StepZilla extends Component {
           // ... during the render, if there are JS errors thrown (e.g. ReferenceError) it gets swallowed by the Promise library and comes in here (catch)
           // ... so we need to rethrow it outside the execution stack so it behaves like a notmal JS error (i.e. halts and prints to console)
           //
-          setTimeout(() => { throw e; });
+          setTimeout(() => {
+            throw e;
+          });
         }
 
         // Promise based validation was a fail (i.e reject())
@@ -232,17 +253,20 @@ export default class StepZilla extends Component {
     if (this.props.dontValidate) {
       proceed = true;
     } else if (skipValidationExecution) {
-        // we are moving backwards in steps, in this case dont validate as it means the user is not commiting to "save"
+      // we are moving backwards in steps, in this case dont validate as it means the user is not commiting to "save"
       proceed = true;
     } else if (this.isStepAtIndexHOCValidationBased(this.state.compState)) {
-        // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
-        // so use hocValidationAppliedTo to determine if this step needs the aync validation as per react-validation-mixin interface
+      // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
+      // so use hocValidationAppliedTo to determine if this step needs the aync validation as per react-validation-mixin interface
       proceed = this.refs.activeComponent.refs.component.isValidated();
-    } else if (Object.keys(this.refs).length == 0 || typeof this.refs.activeComponent.isValidated === 'undefined') {
-        // if its a form component, it should have implemeted a public isValidated class (also pure componenets wont even have refs - i.e. a empty object). If not then continue
+    } else if (
+      Object.keys(this.refs).length == 0 ||
+      typeof this.refs.activeComponent.isValidated === 'undefined'
+    ) {
+      // if its a form component, it should have implemeted a public isValidated class (also pure componenets wont even have refs - i.e. a empty object). If not then continue
       proceed = true;
     } else {
-        // user is moving forward in steps, invoke validation as its available
+      // user is moving forward in steps, invoke validation as its available
       proceed = this.refs.activeComponent.isValidated();
     }
 
@@ -250,7 +274,10 @@ export default class StepZilla extends Component {
   }
 
   isStepAtIndexHOCValidationBased(stepIndex) {
-    return (this.props.hocValidationAppliedTo.length > 0 && this.props.hocValidationAppliedTo.indexOf(stepIndex) > -1);
+    return (
+      this.props.hocValidationAppliedTo.length > 0 &&
+      this.props.hocValidationAppliedTo.indexOf(stepIndex) > -1
+    );
   }
 
   // a validation method is each step can be sync or async (Promise based), this utility abstracts the wrapper stepMoveAllowed to be Promise driven regardless of validation return type
@@ -263,7 +290,9 @@ export default class StepZilla extends Component {
     let liClassName = `${className}-${this.state.navState.styles[i]}`;
 
     // if step ui based navigation is disabled, then dont highlight step
-    if (!this.props.stepsNavigation) { liClassName += ' no-hl'; }
+    if (!this.props.stepsNavigation) {
+      liClassName += ' no-hl';
+    }
 
     return liClassName;
   }
@@ -271,9 +300,16 @@ export default class StepZilla extends Component {
   // render the steps as stepsNavigation
   renderSteps() {
     return this.props.steps.map((s, i) => (
-      <li className={this.getClassName('progtrckr', i)} onClick={(evt) => { this.props.onProgressTrackerJump(this.jumpToStep(evt)); }} key={i} value={i}>
-          <em>{i + 1}</em>
-          <span>{this.props.steps[i].name}</span>
+      <li
+        className={this.getClassName('progtrckr', i)}
+        onClick={(evt) => {
+          this.props.onProgressTrackerJump(this.jumpToStep(evt));
+        }}
+        key={i}
+        value={i}
+      >
+        <em>{i + 1}</em>
+        <span>{this.props.steps[i].name}</span>
       </li>
     ));
   }
@@ -293,37 +329,56 @@ export default class StepZilla extends Component {
     const componentPointer = this.props.steps[this.state.compState].component;
 
     // can only update refs if its a regular React component (not a pure component), so lets check that
-    if (componentPointer instanceof Component || // unit test deteceted that instanceof Component can be in either of these locations so test both (not sure why this is the case)
-        (componentPointer.type && componentPointer.type.prototype instanceof Component)) {
+    if (
+      componentPointer instanceof Component || // unit test deteceted that instanceof Component can be in either of these locations so test both (not sure why this is the case)
+      (componentPointer.type &&
+        componentPointer.type.prototype instanceof Component)
+    ) {
       cloneExtensions.ref = 'activeComponent';
     }
 
     compToRender = React.cloneElement(componentPointer, cloneExtensions);
 
-    const percentComplete = (this.state.compState + 1) / this.props.steps.length * 100;
+    const percentComplete =
+      ((this.state.compState + 1) / this.props.steps.length) * 100;
 
     return (
-      <div className="multi-step" onKeyDown={(evt) => { this.handleKeyDown(evt); }}>
-          {
-              this.props.showSteps
-                  ?
-                  <div className="progtracker-wrap">
-                    <div className="progtracker-track" style={{ width: `${percentComplete}%` }}/>
-                    <div className="progtracker-list">
-                      <ol>
-                        {this.renderSteps()}
-                      </ol>
-                    </div>
-                  </div>
-              : <span></span>
-          }
+      <div className="stepzilla">
+        <div
+          className="multi-step"
+          onKeyDown={(evt) => {
+            this.handleKeyDown(evt);
+          }}
+        >
+          {this.props.showSteps ? (
+            <div className="progtracker-wrap">
+              <div
+                className="progtracker-track"
+                style={{ width: `${percentComplete}%` }}
+              />
+              <div className="progtracker-list">
+                <ol>{this.renderSteps()}</ol>
+              </div>
+            </div>
+          ) : (
+            <span />
+          )}
+        </div>
 
+        <div className="step-component">
           {compToRender}
-        <div style={this.props.showNavigation ? {} : this.hidden} className="footer-buttons">
+        </div>
+
+        <div
+          style={this.props.showNavigation ? {} : this.hidden}
+          className="footer-buttons"
+        >
           <button
             style={this.state.showPreviousBtn ? {} : this.hidden}
             className={props.backButtonCls}
-            onClick={() => { this.previous(); }}
+            onClick={() => {
+              this.previous();
+            }}
             id="prev-button"
           >
             {this.props.backButtonText}
@@ -331,7 +386,9 @@ export default class StepZilla extends Component {
           <button
             style={this.state.showNextBtn ? {} : this.hidden}
             className={props.nextButtonCls}
-            onClick={() => { this.next(); }}
+            onClick={() => {
+              this.next();
+            }}
             id="next-button"
           >
             {this.state.nextStepText}
@@ -358,10 +415,12 @@ StepZilla.defaultProps = {
 };
 
 StepZilla.propTypes = {
-  steps: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    component: PropTypes.element.isRequired
-  })).isRequired,
+  steps: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      component: PropTypes.element.isRequired
+    })
+  ).isRequired,
   showSteps: PropTypes.bool,
   showNavigation: PropTypes.bool,
   stepsNavigation: PropTypes.bool,
