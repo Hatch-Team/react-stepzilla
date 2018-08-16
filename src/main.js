@@ -303,7 +303,13 @@ export default class StepZilla extends Component {
       <li
         className={this.getClassName('progtrckr', i)}
         onClick={(evt) => {
-          this.props.onProgressTrackerJump(this.jumpToStep(evt));
+          const canJump = this.props.stepNavEnabled;
+
+          if (this.props.stepNavEnabled) {
+            this.props.onStepJump(this.jumpToStep(evt));
+          } else {
+            this.props.onPreventedStepJump();
+          }
         }}
         key={i}
         value={i}
@@ -411,7 +417,8 @@ StepZilla.defaultProps = {
   nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
   backButtonText: 'Previous',
   backButtonCls: 'btn btn-next btn-primary btn-lg pull-left',
-  hocValidationAppliedTo: []
+  hocValidationAppliedTo: [],
+  stepNavEnabled: true
 };
 
 StepZilla.propTypes = {
@@ -434,5 +441,7 @@ StepZilla.propTypes = {
   backButtonText: PropTypes.string,
   hocValidationAppliedTo: PropTypes.array,
   onStepChange: PropTypes.func,
-  onProgressTrackerJump: PropTypes.func
+  onStepJump: PropTypes.func,
+  onPreventedStepJump: PropTypes.func,
+  stepNavEnabled: PropTypes.boolean
 };

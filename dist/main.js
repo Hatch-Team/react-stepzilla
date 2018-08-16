@@ -366,7 +366,13 @@ var StepZilla = function (_Component) {
           {
             className: _this5.getClassName('progtrckr', i),
             onClick: function onClick(evt) {
-              _this5.props.onProgressTrackerJump(_this5.jumpToStep(evt));
+              var canJump = _this5.props.stepNavEnabled;
+
+              if (_this5.props.stepNavEnabled) {
+                _this5.props.onStepJump(_this5.jumpToStep(evt));
+              } else {
+                _this5.props.onPreventedStepJump();
+              }
             },
             key: i,
             value: i
@@ -502,7 +508,8 @@ StepZilla.defaultProps = {
   nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
   backButtonText: 'Previous',
   backButtonCls: 'btn btn-next btn-primary btn-lg pull-left',
-  hocValidationAppliedTo: []
+  hocValidationAppliedTo: [],
+  stepNavEnabled: true
 };
 
 StepZilla.propTypes = {
@@ -523,5 +530,7 @@ StepZilla.propTypes = {
   backButtonText: _propTypes2.default.string,
   hocValidationAppliedTo: _propTypes2.default.array,
   onStepChange: _propTypes2.default.func,
-  onProgressTrackerJump: _propTypes2.default.func
+  onStepJump: _propTypes2.default.func,
+  onPreventedStepJump: _propTypes2.default.func,
+  stepNavEnabled: _propTypes2.default.boolean
 };
