@@ -366,12 +366,17 @@ var StepZilla = function (_Component) {
           {
             className: _this5.getClassName('progtrckr', i),
             onClick: function onClick(evt) {
-              var canJump = _this5.props.stepNavEnabled;
+              // If we don't have step nav enabled, call the prevented callback
+              if (!_this5.props.stepNavEnabled) {
+                if (_this5.props.onPreventedStepJump) _this5.props.onPreventedStepJump();
+                return;
+              }
 
-              if (_this5.props.stepNavEnabled) {
+              // If we have the callback, call it, otherwise move on
+              if (_this5.props.onStepJump) {
                 _this5.props.onStepJump(_this5.jumpToStep(evt));
               } else {
-                _this5.props.onPreventedStepJump();
+                _this5.jumpToStep(evt);
               }
             },
             key: i,
