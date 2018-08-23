@@ -303,12 +303,17 @@ export default class StepZilla extends Component {
       <li
         className={this.getClassName('progtrckr', i)}
         onClick={(evt) => {
-          const canJump = this.props.stepNavEnabled;
+          // If we don't have step nav enabled, call the prevented callback
+          if (!this.props.stepNavEnabled) {
+            if (this.props.onPreventedStepJump) this.props.onPreventedStepJump();
+            return;
+          }
 
-          if (this.props.stepNavEnabled) {
+          // If we have the callback, call it, otherwise move on
+          if (this.props.onStepJump) {
             this.props.onStepJump(this.jumpToStep(evt));
           } else {
-            this.props.onPreventedStepJump();
+            this.jumpToStep(evt);
           }
         }}
         key={i}
