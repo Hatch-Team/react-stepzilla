@@ -301,14 +301,9 @@ var StepZilla = function (_Component) {
   }, {
     key: 'stepMoveAllowed',
     value: function stepMoveAllowed() {
-      var skipValidationExecution = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
       var proceed = false;
 
       if (this.props.dontValidate) {
-        proceed = true;
-      } else if (skipValidationExecution) {
-        // we are moving backwards in steps, in this case dont validate as it means the user is not commiting to "save"
         proceed = true;
       } else if (this.isStepAtIndexHOCValidationBased(this.state.compState)) {
         // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,

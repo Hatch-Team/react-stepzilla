@@ -247,13 +247,10 @@ export default class StepZilla extends Component {
   }
 
   // are we allowed to move forward? via the next button or via jumpToStep?
-  stepMoveAllowed(skipValidationExecution = false) {
+  stepMoveAllowed() {
     let proceed = false;
 
     if (this.props.dontValidate) {
-      proceed = true;
-    } else if (skipValidationExecution) {
-      // we are moving backwards in steps, in this case dont validate as it means the user is not commiting to "save"
       proceed = true;
     } else if (this.isStepAtIndexHOCValidationBased(this.state.compState)) {
       // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
