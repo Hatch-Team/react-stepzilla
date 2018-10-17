@@ -445,5 +445,5 @@ StepZilla.propTypes = {
   onStepChange: PropTypes.func,
   onStepJump: PropTypes.func,
   onPreventedStepJump: PropTypes.func,
-  stepNavEnabled: PropTypes.boolean
+  stepNavEnabled: PropTypes.bool
 };
